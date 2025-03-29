@@ -2,7 +2,9 @@ locals {
   project_id   = var.project_id
   project_name = var.project_name
   # Enable APIs
-  services = []
+  services = [
+    "secretmanager.googleapis.com"
+  ]
   billing_account = var.billing_account_id
 }
 
