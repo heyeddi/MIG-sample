@@ -11,3 +11,7 @@ terraform {
 provider "google" {
   region = "us-east1"
 }
+
+data "google_project" "default" {
+  project_id = var.project_id
+}
