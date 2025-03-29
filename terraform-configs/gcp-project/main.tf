@@ -3,7 +3,8 @@ locals {
   project_name = var.project_name
   # Enable APIs
   services = [
-    "secretmanager.googleapis.com"
+    "secretmanager.googleapis.com",
+    "compute.googleapis.com"
   ]
   billing_account = var.billing_account_id
 }
