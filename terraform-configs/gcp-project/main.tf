@@ -4,7 +4,9 @@ locals {
   # Enable APIs
   services = [
     "secretmanager.googleapis.com",
-    "compute.googleapis.com"
+    "compute.googleapis.com",
+    "artifactregistry.googleapis.com",
+    "cloudresourcemanager.googleapis.com"
   ]
   billing_account = var.billing_account_id
 }
