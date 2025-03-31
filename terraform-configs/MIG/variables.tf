@@ -3,3 +3,8 @@ variable "project_id" {
   description = "Project ID"
 }
 
+variable "database_name" {
+  type        = string
+  description = "Name for the database"
+  default = "mig-database"
+}
