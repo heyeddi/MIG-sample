@@ -1,0 +1,28 @@
+[project]
+name = "simple-python-app"
+version = "0.1.0"
+description = ""
+authors = [{ name = "Edmundo Sanchez", email = "eddi@heyeddi.com" }]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi[standard] (>=0.115.12,<0.116.0)",
+    "poethepoet (>=0.33.1,<0.34.0)",
+    "sqlmodel (>=0.0.24,<0.0.25)",
+    "google-auth (>=2.38.0,<3.0.0)",
+    "pg8000 (>=1.31.2,<2.0.0)",
+    "requests (>=2.32.3,<3.0.0)",
+]
+
+[tool.poetry]
+packages = [{ include = "simple_python_app", from = "src" }]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poe.tasks]
+serve = "fastapi run src/simple_python_app/app.py --port 5000"
+reqs = { shell = "poetry export --without-hashes > requirements.txt" }
+deploy-docker = { shell = "docker build -t us-east1-docker.pkg.dev/eddi-sample-project/eddi-registry/simple-python-app:latest . && docker push us-east1-docker.pkg.dev/eddi-sample-project/eddi-registry/simple-python-app:latest" }
