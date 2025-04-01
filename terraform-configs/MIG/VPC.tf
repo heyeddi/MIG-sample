@@ -20,12 +20,6 @@ resource "google_compute_firewall" "allow_internal" {
   name    = "app-mig-vpc-allow-internal"
   network = google_compute_network.default.name
 
-  # Allow SSH
-  allow {
-    protocol = "tcp"
-    ports    = ["22"]
-  }
-
   # no need to allow CLoudSQL, using the Connector
   allow {
     protocol = "tcp"
@@ -33,6 +27,20 @@ resource "google_compute_firewall" "allow_internal" {
   }
   #source_ranges = ["0.0.0.0/0"] # for testing
   source_ranges = [google_compute_subnetwork.default.ip_cidr_range]
+}
+
+resource "google_compute_firewall" "allow_iap_tcp" {
+  project = data.google_project.default.project_id
+  name    = "allow-iap-tcp"
+  network = google_compute_network.default.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+
+  source_ranges = ["35.235.240.0/20"] # IAP IPs
+  direction     = "INGRESS"
 }
 
 # Allocate IP range for private services (MIG, CloudSQL)
