@@ -112,3 +112,33 @@ terraform destroy
 cd ../gcp-project
 terraform destroy
 ```
+
+## LIVE DEMO
+Here are some example commands to interact with the live API:
+
+### Health Check
+```bash
+curl http://35.241.20.250:80/health
+```
+
+### Create Content
+```bash
+curl -X POST http://35.241.20.250:80/content/ \
+     -H "Content-Type: application/json" \
+     -d '{"content": "This is a test message"}'
+```
+
+### List All Content
+```bash
+curl http://35.241.20.250:80/content/
+```
+
+### Get Specific Content by ID
+```bash
+curl http://35.241.20.250:80/content/1
+```
+
+### Delete Content by ID
+```bash
+curl -X DELETE http://35.241.20.250:80/content/1
+```
