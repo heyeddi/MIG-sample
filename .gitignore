@@ -1,0 +1,18 @@
+# I stored the exercise instructions here
+EXERCISE.md
+# ignore TF files and local states
+.terraform.lock.hcl
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+.env
+.env.docker
+
+# zed editor project config
+.zed
+
+# Python things
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
