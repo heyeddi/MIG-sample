@@ -16,6 +16,60 @@ The architecture consists of:
 - **Artifact Registry**: For storing Docker images
 - **Secret Manager**: Securely storing database credentials
 
+### Decisions and notes
+
+- I went with Instance Groups because Autoscaling was mentioned, and It had to be GCE, otherwise I would have used Cloud Run, which had a native integration with CloudSQL, it would have been way simpler.
+- I put the MIG and CloudSQL in the VPC, so no one can access those from outside the subnetwork, so secure and simple.
+- For the Firewall, I allowed only the GCE Port and SSH port
+- For DB, I mendtioned, I went with CloudSQL, it's a simple MySQL and Posgre compatible managed db.
+- To deploy code I decided a docker image in a GCP Artifact registry would be simple.
+- To allow secure access, I used IAP, and a firewal rule to allow ingress trafic from known IAP ips
+  - all you have to do is sue this command `gcloud compute ssh INSTANCE_NAME --tunnel-through-iap --project=PROJECT --zone=ZONE`, you will be loggedin
+- I did not setup logging, monitoring, alerts, etc. Decided taht was too much for this demo.
+
+### Challenges and Lessons
+
+During developement I faced a few issues, I had fun and learned a lot.
+
+- IAM users in CloudSQL do not have access to Create Tables, or Write data
+  - The way to fix that is to login to the DB and grant rights to the user, which is not a pretty process.
+  - Hence, I decided to switch the approach and create a normal CloudSQL user whiuch logins with a user and password
+  - Once that was done, the project flow was better, and I observed security by not storing the password on the Terraform State or log file
+- A simple Python APP is not as simple when on the cloud.
+  - I implemented CloudSQL connector and reading the db pasword  from Secret Manager.
+  I have to say I did copy most of  the code, but to make it work with CloudSQL I had to adapt it, I left links of documents I read throught the project.
+- To make this simpler as a devlopent process, I would have used Terraform Workspaces, to have a `Dev` and `Prod` environments, with different configurations, I got stuck a few times but I was too deep to implement workspaces, I handled with temporary settings and environment variables, even with some custom config I deleted the end.
+
+## LIVE DEMO
+Here are some example commands to interact with the live API:
+
+### Health Check
+```bash
+curl http://35.241.20.250:80/health
+```
+
+### Create Content
+```bash
+curl -X POST http://35.241.20.250:80/content/ \
+     -H "Content-Type: application/json" \
+     -d '{"content": "This is a test message"}'
+```
+
+### List All Content
+```bash
+curl http://35.241.20.250:80/content/
+```
+
+### Get Specific Content by ID
+```bash
+curl http://35.241.20.250:80/content/1
+```
+
+### Delete Content by ID
+```bash
+curl -X DELETE http://35.241.20.250:80/content/1
+```
+
 ## Project Structure
 
 ```
@@ -111,34 +165,4 @@ terraform destroy
 
 cd ../gcp-project
 terraform destroy
-```
-
-## LIVE DEMO
-Here are some example commands to interact with the live API:
-
-### Health Check
-```bash
-curl http://35.241.20.250:80/health
-```
-
-### Create Content
-```bash
-curl -X POST http://35.241.20.250:80/content/ \
-     -H "Content-Type: application/json" \
-     -d '{"content": "This is a test message"}'
-```
-
-### List All Content
-```bash
-curl http://35.241.20.250:80/content/
-```
-
-### Get Specific Content by ID
-```bash
-curl http://35.241.20.250:80/content/1
-```
-
-### Delete Content by ID
-```bash
-curl -X DELETE http://35.241.20.250:80/content/1
 ```
