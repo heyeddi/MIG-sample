@@ -12,6 +12,8 @@ dependencies = [
     "google-auth (>=2.38.0,<3.0.0)",
     "pg8000 (>=1.31.2,<2.0.0)",
     "requests (>=2.32.3,<3.0.0)",
+    "cloud-sql-python-connector[pg8000] (>=1.18.0,<2.0.0)",
+    "google-cloud-secret-manager (>=2.23.2,<3.0.0)",
 ]
 
 [tool.poetry]
@@ -26,3 +28,4 @@ build-backend = "poetry.core.masonry.api"
 serve = "fastapi run src/simple_python_app/app.py --port 5000"
 reqs = { shell = "poetry export --without-hashes > requirements.txt" }
 deploy-docker = { shell = "docker build -t us-east1-docker.pkg.dev/eddi-sample-project/eddi-registry/simple-python-app:latest . && docker push us-east1-docker.pkg.dev/eddi-sample-project/eddi-registry/simple-python-app:latest" }
+run-docker = { shell = "docker build -t simple-python-app . && docker run -p 5000:5000 --env-file .env.docker simple-python-app" }

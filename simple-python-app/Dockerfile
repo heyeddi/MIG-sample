@@ -1,11 +1,14 @@
-FROM python:3.9
+FROM python:3.12
 
 WORKDIR /code
 
-COPY ./requirements.txt /code/requirements.txt
+COPY ./requirements.txt requirements.txt
 
-RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
-COPY ./ /code/
+COPY ./ ./
 
-CMD ["fastapi", "run", "app/main.py", "--port", "5000"]
+# Document that this container uses port 5000
+EXPOSE 5000
+
+CMD ["fastapi", "run", "src/simple_python_app/app.py", "--port", "5000"]

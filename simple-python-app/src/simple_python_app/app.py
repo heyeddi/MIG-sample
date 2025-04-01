@@ -4,9 +4,10 @@ from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from sqlmodel import Field, Session, SQLModel, create_engine, select
-from google.auth import default
-from google.auth.transport.requests import Request
-import ssl
+from google.cloud.sql.connector import Connector, IPTypes
+from google.cloud.secretmanager import SecretManagerServiceClient
+import os
+import pg8000.dbapi
 
 class Content(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -17,38 +18,39 @@ PROJECT_ID = "eddi-sample-project"
 REGION = "us-east1"
 INSTANCE_NAME = "mig-database"
 DATABASE_NAME = "mig-database"
+SECRET_NAME = "mig-db-password"
+INSTANCE_CONN_NAME = f"{PROJECT_ID}:{REGION}:{INSTANCE_NAME}"
+DB_USER = "mig-app-user"
+# Retrieve DB password from Secret Manager
+secret_client = SecretManagerServiceClient()
+secret_name = f"projects/{PROJECT_ID}/secrets/{SECRET_NAME}/versions/latest"
+response = secret_client.access_secret_version(request={"name": secret_name})
+DB_PASSWORD = response.payload.data.decode("UTF-8")
+IP_TYPE = IPTypes.PUBLIC if os.environ.get("PUBLIC_IP") else IPTypes.PRIVATE
+# initialize Cloud SQL Python Connector object
+connector = Connector(refresh_strategy="LAZY")
 
-# Construct the Cloud SQL connection string
-DATABASE_URL = f"postgresql+pg8000:///{DATABASE_NAME}?host=/cloudsql/{PROJECT_ID}:{REGION}:{INSTANCE_NAME}"
+def getconn():
+    conn = connector.connect(
+        INSTANCE_CONN_NAME,
+        "pg8000",
+        user=DB_USER,
+        password=DB_PASSWORD,
+        db=DATABASE_NAME,
+        enable_iam_auth=True,
+        ip_type=IP_TYPE,
+    )
+    return conn
 
-# Get default credentials
-credentials, project = default(scopes=["https://www.googleapis.com/auth/cloud-platform"])
-# Refresh the credentials
-credentials.refresh(Request())
-# Get the service account email
-user_email = credentials.service_account_email.replace(".gserviceaccount.com", "")
-# Get the authentication token
-auth_token = credentials.token
-# Create SSL context
-ssl_context = ssl.create_default_context()
-# Create SQLAlchemy engine with IAM authentication
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={
-        "user": user_email, # Add the user argument
-        "password": auth_token,
-        "ssl_context": ssl_context,
-    },
-)
+# Create the Engine
+engine = create_engine("postgresql+pg8000://", creator=getconn)
 
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
 
-
 def get_session():
     with Session(engine) as session:
         yield session
-
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
