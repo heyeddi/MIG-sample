@@ -6,7 +6,9 @@ locals {
     "secretmanager.googleapis.com",
     "compute.googleapis.com",
     "artifactregistry.googleapis.com",
-    "cloudresourcemanager.googleapis.com"
+    "cloudresourcemanager.googleapis.com",
+    "sqladmin.googleapis.com",
+    "servicenetworking.googleapis.com"
   ]
   billing_account = var.billing_account_id
 }
